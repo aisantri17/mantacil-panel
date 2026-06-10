@@ -97,6 +97,9 @@ class ServerCreationService
             $this->daemonServerRepository->setServer($server)->create(
                 Arr::get($data, 'start_on_completion', false) ?? false
             );
+            
+            // MantaCil Auto-Subdomain
+            $this->createCloudflareSubdomain($server);
         } catch (DaemonConnectionException $exception) {
             $this->serverDeletionService->withForce()->handle($server);
 
@@ -212,5 +215,45 @@ class ServerCreationService
         }
 
         return $uuid;
+    }
+
+    /**
+     * MantaCil: Create a Cloudflare Subdomain automatically when server is created.
+     */
+    private function createCloudflareSubdomain(Server $server): void
+    {
+        $token = env('CLOUDFLARE_API_TOKEN');
+        $zoneId = env('CLOUDFLARE_ZONE_ID');
+        $domain = env('CLOUDFLARE_DOMAIN');
+
+        if (empty($token) || empty($zoneId) || empty($domain)) {
+            return;
+        }
+
+        $sub = \Illuminate\Support\Str::slug($server->name);
+        if (empty($sub)) {
+            $sub = $server->uuidShort;
+        }
+
+        $node = $server->node;
+        $ip = $node->fqdn;
+        $type = filter_var($ip, FILTER_VALIDATE_IP) ? 'A' : 'CNAME';
+
+        $url = "https://api.cloudflare.com/client/v4/zones/{$zoneId}/dns_records";
+        
+        try {
+            \Illuminate\Support\Facades\Http::withHeaders([
+                'Authorization' => 'Bearer ' . $token,
+                'Content-Type'  => 'application/json'
+            ])->post($url, [
+                'type'    => $type,
+                'name'    => $sub,
+                'content' => $ip,
+                'ttl'     => 1,
+                'proxied' => false
+            ]);
+        } catch (\Exception $e) {
+            // Ignore if cloudflare fails, do not interrupt server creation
+        }
     }
 }

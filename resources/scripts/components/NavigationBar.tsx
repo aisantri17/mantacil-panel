@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCogs, faLayerGroup, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faCogs, faLayerGroup, faSignOutAlt, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 import { useStoreState } from 'easy-peasy';
 import { ApplicationStore } from '@/state';
 import SearchContainer from '@/components/dashboard/search/SearchContainer';
@@ -59,6 +59,14 @@ export default () => {
                 </div>
                 <RightNavigation className={'flex h-full items-center justify-center'}>
                     <SearchContainer />
+                    
+                    {/* MantaCil Store Button */}
+                    <Tooltip placement={'bottom'} content={'Beli Server + Subdomain (Rp5k)'}>
+                        <a href={'https://wa.me/6281234567890?text=Halo%20Admin,%20saya%20mau%20beli%20paket%20Server%20+%20Subdomain%20seharga%20Rp5.000!'} target="_blank" rel={'noreferrer'} className={'text-green-400 hover:text-green-300'}>
+                            <FontAwesomeIcon icon={faShoppingCart} />
+                        </a>
+                    </Tooltip>
+
                     <Tooltip placement={'bottom'} content={'Dasbor'}>
                         <NavLink to={'/'} exact>
                             <FontAwesomeIcon icon={faLayerGroup} />
