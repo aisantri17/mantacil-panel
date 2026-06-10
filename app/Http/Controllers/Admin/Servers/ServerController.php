@@ -18,7 +18,14 @@ class ServerController extends Controller
      */
     public function index(Request $request): View
     {
-        $servers = QueryBuilder::for(Server::query()->with('node', 'user', 'allocation'))
+        $query = Server::query()->with('node', 'user', 'allocation');
+        
+        // MantaCil Privacy: Only SuperAdmin (ID 1) can see all servers
+        if ($request->user()->id !== 1) {
+            $query->where('owner_id', $request->user()->id);
+        }
+
+        $servers = QueryBuilder::for($query)
             ->allowedFilters([
                 AllowedFilter::exact('owner_id'),
                 AllowedFilter::custom('*', new AdminServerFilter()),

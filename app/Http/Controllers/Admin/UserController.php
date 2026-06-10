@@ -45,8 +45,15 @@ class UserController extends Controller
      */
     public function index(Request $request): View
     {
+        $query = clone User::query();
+        
+        // MantaCil Privacy: Normal admins only see themselves
+        if ($request->user()->id !== 1) {
+            $query->where('users.id', $request->user()->id);
+        }
+
         $users = QueryBuilder::for(
-            User::query()->select('users.*')
+            $query->select('users.*')
                 ->selectRaw('COUNT(DISTINCT(subusers.id)) as subuser_of_count')
                 ->selectRaw('COUNT(DISTINCT(servers.id)) as servers_count')
                 ->leftJoin('subusers', 'subusers.user_id', '=', 'users.id')
@@ -135,7 +142,12 @@ class UserController extends Controller
      */
     public function json(Request $request): Model|Collection
     {
-        $users = QueryBuilder::for(User::query())->allowedFilters(['email'])->paginate(25);
+        $query = User::query();
+        if ($request->user()->id !== 1) {
+            $query->where('id', $request->user()->id);
+        }
+
+        $users = QueryBuilder::for($query)->allowedFilters(['email'])->paginate(25);
 
         // Handle single user requests.
         if ($request->query('user_id')) {
