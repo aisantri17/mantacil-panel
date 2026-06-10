@@ -20,6 +20,10 @@ use MantaCil\Http\Middleware\Api\Client\Server\AuthenticateServerAccess;
 Route::get('/', [Client\ClientController::class, 'index'])->name('api:client.index');
 Route::get('/permissions', [Client\ClientController::class, 'permissions']);
 
+// MantaCil Store (Pakasir Integration)
+Route::post('/store/checkout', [Client\StoreController::class, 'checkout']);
+Route::get('/store/status/{order_id}', [Client\StoreController::class, 'checkStatus']);
+
 Route::prefix('/account')->middleware(AccountSubject::class)->group(function () {
     Route::prefix('/')->withoutMiddleware(RequireTwoFactorAuthentication::class)->group(function () {
         Route::get('/', [Client\AccountController::class, 'index'])->name('api:client.account');

@@ -12,6 +12,7 @@ import http from '@/api/http';
 import SpinnerOverlay from '@/components/elements/SpinnerOverlay';
 import Tooltip from '@/components/elements/tooltip/Tooltip';
 import Avatar from '@/components/Avatar';
+import StoreModal from '@/components/StoreModal';
 
 const RightNavigation = styled.div`
     & > a,
@@ -34,6 +35,7 @@ export default () => {
     const name = useStoreState((state: ApplicationStore) => state.settings.data!.name);
     const rootAdmin = useStoreState((state: ApplicationStore) => state.user.data!.rootAdmin);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [storeVisible, setStoreVisible] = useState(false);
 
     const onTriggerLogout = () => {
         setIsLoggingOut(true);
@@ -46,6 +48,7 @@ export default () => {
     return (
         <div className={'w-full pt-4 px-4 flex justify-center sticky top-0 z-50'}>
             <SpinnerOverlay visible={isLoggingOut} />
+            <StoreModal visible={storeVisible} onDismissed={() => setStoreVisible(false)} />
             <div className={'glass-pill flex items-center h-[3.5rem] w-full max-w-[800px] px-6 shadow-2xl transition-all duration-300'}>
                 <div id={'logo'} className={'flex-1'}>
                     <Link
@@ -62,9 +65,9 @@ export default () => {
                     
                     {/* MantaCil Store Button */}
                     <Tooltip placement={'bottom'} content={'Beli Server + Subdomain (Rp5k)'}>
-                        <a href={'https://wa.me/6281234567890?text=Halo%20Admin,%20saya%20mau%20beli%20paket%20Server%20+%20Subdomain%20seharga%20Rp5.000!'} target="_blank" rel={'noreferrer'} className={'text-green-400 hover:text-green-300'}>
+                        <button onClick={() => setStoreVisible(true)} className={'text-green-400 hover:text-green-300 px-6 cursor-pointer rounded-full mx-1 transition-all duration-150'}>
                             <FontAwesomeIcon icon={faShoppingCart} />
-                        </a>
+                        </button>
                     </Tooltip>
 
                     <Tooltip placement={'bottom'} content={'Dasbor'}>
