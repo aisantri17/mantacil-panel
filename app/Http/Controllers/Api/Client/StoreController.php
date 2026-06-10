@@ -21,8 +21,8 @@ class StoreController extends Controller
 
     public function __construct(private ServerCreationService $creationService)
     {
-        $this->pakasirSlug = env('PAKASIR_SLUG', 'ota-store');
-        $this->pakasirKey = env('PAKASIR_API_KEY', 'jdRFkm9Ko8r7xQQEO5M3ykjAUdXq2o3w');
+        $this->pakasirSlug = env('PAKASIR_SLUG', '');
+        $this->pakasirKey = env('PAKASIR_API_KEY', '');
     }
 
     public function checkout(Request $request): JsonResponse
