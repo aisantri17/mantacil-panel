@@ -1,0 +1,54 @@
+<?php
+
+namespace MantaCil\Services\Servers;
+
+use Illuminate\Support\Arr;
+use MantaCil\Models\Server;
+use MantaCil\Jobs\RevokeSftpAccessJob;
+use Illuminate\Database\ConnectionInterface;
+use MantaCil\Traits\Services\ReturnsUpdatedModels;
+use MantaCil\Repositories\Wings\DaemonServerRepository;
+use MantaCil\Repositories\Wings\DaemonRevocationRepository;
+
+class DetailsModificationService
+{
+    use ReturnsUpdatedModels;
+
+    /**
+     * DetailsModificationService constructor.
+     */
+    public function __construct(
+        private ConnectionInterface $connection,
+        private DaemonServerRepository $serverRepository,
+        private DaemonRevocationRepository $revocationRepository,
+    ) {
+    }
+
+    /**
+     * Update the details for a single server instance.
+     *
+     * @throws \Throwable
+     */
+    public function handle(Server $server, array $data): Server
+    {
+        return $this->connection->transaction(function () use ($data, $server) {
+            $original = $server->user;
+
+            $server->forceFill([
+                'external_id' => Arr::get($data, 'external_id'),
+                'owner_id' => Arr::get($data, 'owner_id'),
+                'name' => Arr::get($data, 'name'),
+                'description' => Arr::get($data, 'description') ?? '',
+            ])->saveOrFail();
+
+            // If the owner_id value is changed we need to revoke any tokens that exist for the server
+            // on the Wings instance so that the old owner no longer has any permission to access the
+            // websockets.
+            if (! $server->refresh()->user->is($original)) {
+                RevokeSftpAccessJob::dispatch($original->uuid, $server);
+            }
+
+            return $server;
+        });
+    }
+}
