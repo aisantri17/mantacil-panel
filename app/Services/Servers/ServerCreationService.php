@@ -218,15 +218,14 @@ class ServerCreationService
     }
 
     /**
-     * MantaCil: Create a Cloudflare Subdomain automatically when server is created.
+     * MantaCil: Create a Cloudflare Subdomain automatically via MantaCil Central API.
      */
     private function createCloudflareSubdomain(Server $server): void
     {
-        $token = env('CLOUDFLARE_API_TOKEN');
-        $zoneId = env('CLOUDFLARE_ZONE_ID');
-        $domain = env('CLOUDFLARE_DOMAIN');
+        $apiUrl = env('MANTACIL_API_URL');
+        $apiKey = env('MANTACIL_API_KEY');
 
-        if (empty($token) || empty($zoneId) || empty($domain)) {
+        if (empty($apiUrl) || empty($apiKey)) {
             return;
         }
 
@@ -237,23 +236,15 @@ class ServerCreationService
 
         $node = $server->node;
         $ip = $node->fqdn;
-        $type = filter_var($ip, FILTER_VALIDATE_IP) ? 'A' : 'CNAME';
 
-        $url = "https://api.cloudflare.com/client/v4/zones/{$zoneId}/dns_records";
-        
         try {
-            \Illuminate\Support\Facades\Http::withHeaders([
-                'Authorization' => 'Bearer ' . $token,
-                'Content-Type'  => 'application/json'
-            ])->post($url, [
-                'type'    => $type,
-                'name'    => $sub,
-                'content' => $ip,
-                'ttl'     => 1,
-                'proxied' => false
+            \Illuminate\Support\Facades\Http::post("{$apiUrl}/api/manta/create-subdomain", [
+                'sub' => $sub,
+                'ip'  => $ip,
+                'manta_key' => $apiKey
             ]);
         } catch (\Exception $e) {
-            // Ignore if cloudflare fails, do not interrupt server creation
+            // Ignore if the central API fails, do not interrupt server creation
         }
     }
 }
