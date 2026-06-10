@@ -14,30 +14,30 @@ export default () => {
 
     return status === 'installing' || status === 'install_failed' || status === 'reinstall_failed' ? (
         <ScreenBlock
-            title={'Running Installer'}
+            title={'Menjalankan Installer'}
             image={ServerInstallSvg}
-            message={'Your server should be ready soon, please try again in a few minutes.'}
+            message={'Server Anda akan segera siap, silakan coba lagi dalam beberapa menit.'}
         />
     ) : status === 'suspended' ? (
         <ScreenBlock
-            title={'Server Suspended'}
+            title={'Server Dibekukan (Suspended)'}
             image={ServerErrorSvg}
-            message={'This server is suspended and cannot be accessed.'}
+            message={'Server Anda telah dibekukan sementara oleh MantaCil Security. Hal ini biasanya disebabkan oleh deteksi aktivitas ilegal (seperti DDoS/Flood) atau penggunaan CPU yang ekstrim (>95%). Silakan hubungi Administrator untuk informasi lebih lanjut.'}
         />
     ) : isNodeUnderMaintenance ? (
         <ScreenBlock
-            title={'Node under Maintenance'}
+            title={'Node dalam Pemeliharaan'}
             image={ServerErrorSvg}
-            message={'The node of this server is currently under maintenance.'}
+            message={'Node tempat server ini berada sedang dalam masa pemeliharaan (maintenance).'}
         />
     ) : (
         <ScreenBlock
-            title={isTransferring ? 'Transferring' : 'Restoring from Backup'}
+            title={isTransferring ? 'Sedang Mentransfer' : 'Memulihkan dari Cadangan'}
             image={ServerRestoreSvg}
             message={
                 isTransferring
-                    ? 'Your server is being transferred to a new node, please check back later.'
-                    : 'Your server is currently being restored from a backup, please check back in a few minutes.'
+                    ? 'Server Anda sedang ditransfer ke node baru, silakan periksa kembali nanti.'
+                    : 'Server Anda sedang dipulihkan dari cadangan (backup), silakan periksa kembali dalam beberapa menit.'
             }
         />
     );
